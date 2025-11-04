@@ -6,19 +6,22 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
 
-// 1. Importa el Tema
+// 1. Imports necesarios para calcular el tamaño de la pantalla
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+
+// 2. Importa tu Tema (de ui/theme/Theme.kt)
 import com.example.educalink_ev2.ui.theme.EducaLink_EV2Theme
 
-// 2. Importa la PANTALLA ADAPTABLE (la nueva)
+// 3. Importa tu HomeScreen (de ui/screens/HomeScreen.kt)
 import com.example.educalink_ev2.ui.screens.AdaptiveHomeScreen
 
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class) // Necesario para la API
+    // 4. Anotación necesaria para usar calculateWindowSizeClass
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,9 +31,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // 3. Calcula el tamaño de la ventana
+                    // 5. Calcula la clase de tamaño (Móvil, Tablet, etc.)
                     val windowSizeClass = calculateWindowSizeClass(this)
 
-                    // 4. Pasa el tamaño a tu pantalla adaptable
+                    // 6. Pasa ese tamaño a tu HomeScreen.
+                    // (Tu HomeScreen debe estar esperando este parámetro)
                     AdaptiveHomeScreen(windowSizeClass = windowSizeClass)
                 }
+            }
+        }
+    }
+}
