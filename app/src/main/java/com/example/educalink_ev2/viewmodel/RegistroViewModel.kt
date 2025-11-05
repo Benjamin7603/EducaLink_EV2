@@ -1,37 +1,43 @@
 package com.example.educalink_ev2.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.educalink_ev2.model.RegistroUiState
+import com.example.educalink_ev2.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import com.example.educalink_ev2.model.RegistroUiState
+import kotlinx.coroutines.launch
 
-class RegistroViewModel : ViewModel() {
+// 1. El ViewModel ahora recibe el repositorio en su constructor
+class RegistroViewModel(
+    private val repository: UsuarioRepository
+) : ViewModel() {
 
-    // 1. El StateFlow privado y mutable que contiene el estado
     private val _uiState = MutableStateFlow(RegistroUiState())
-
-    // 2. El StateFlow público e inmutable que la UI observará
     val uiState = _uiState.asStateFlow()
 
-    // 3. Funciones que actualizan el estado cuando el usuario escribe
+    // ... (las funciones onNombreChange, onEmailChange, onCarreraChange
+    //      quedan exactamente IGUALES que en la Guía 11) ...
+
     fun onNombreChange(nombre: String) {
-        _uiState.update { currentState ->
-            currentState.copy(nombre = nombre)
-        }
+        _uiState.update { it.copy(nombre = nombre) }
     }
-
     fun onEmailChange(email: String) {
-        _uiState.update { currentState ->
-            currentState.copy(email = email)
-        }
+        _uiState.update { it.copy(email = email) }
     }
-
     fun onCarreraChange(carrera: String) {
-        _uiState.update { currentState ->
-            currentState.copy(carrera = carrera)
-        }
+        _uiState.update { it.copy(carrera = carrera) }
     }
 
-    // (En la Guía 12 agregaremos la lógica para "guardar" aquí)
+    // 2. Nueva función para guardar los datos usando el repositorio
+    fun guardarDatos() {
+        viewModelScope.launch {
+            repository.guardarDatos(
+                nombre = _uiState.value.nombre,
+                email = _uiState.value.email,
+                carrera = _uiState.value.carrera
+            )
+        }
+    }
 }

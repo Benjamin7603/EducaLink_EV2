@@ -12,22 +12,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.educalink_ev2.navigation.AppScreens
 import com.example.educalink_ev2.viewmodel.RegistroViewModel
+import com.example.educalink_ev2.viewmodel.RegistroViewModelFactory // Ojo: Importa la Factory
+
+// Importa el factory (si no lo haces en AppNavigation)
+// import androidx.compose.ui.platform.LocalContext
+// import com.example.educalink_ev2.repository.UsuarioRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(
     navController: NavController,
-    viewModel: RegistroViewModel = viewModel() // 1. Obtiene el ViewModel
+    // 1. El ViewModel ahora debe ser inyectado por la Factory
+    // (Esto se configura en AppNavigation.kt)
+    viewModel: RegistroViewModel
 ) {
-    // 2. Observa el estado (uiState) del ViewModel
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        // ... (Tu TopAppBar queda igual) ...
         topBar = {
             TopAppBar(title = { Text("Registro de Usuario") })
         }
     ) { innerPadding ->
         Column(
+            // ... (Tus TextFields y Column quedan igual) ...
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(16.dp)
@@ -38,44 +46,40 @@ fun RegistroScreen(
 
             Text("Ingrese sus datos", style = MaterialTheme.typography.headlineSmall)
 
-            // 3. Campo de texto para el Nombre
             OutlinedTextField(
                 value = uiState.nombre,
-                onValueChange = { viewModel.onNombreChange(it) }, // Actualiza el VM
+                onValueChange = { viewModel.onNombreChange(it) },
                 label = { Text("Nombre Completo") },
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // 4. Campo de texto para el Email
             OutlinedTextField(
                 value = uiState.email,
-                onValueChange = { viewModel.onEmailChange(it) }, // Actualiza el VM
+                onValueChange = { viewModel.onEmailChange(it) },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // 5. Campo de texto para la Carrera
             OutlinedTextField(
                 value = uiState.carrera,
-                onValueChange = { viewModel.onCarreraChange(it) }, // Actualiza el VM
+                onValueChange = { viewModel.onCarreraChange(it) },
                 label = { Text("Carrera") },
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(Modifier.height(16.dp))
 
-            // 6. Botón para navegar al Resumen
+            // 2. ¡Aquí está el cambio!
             Button(
                 onClick = {
-                    // Pasa los datos a la pantalla de resumen usando la ruta
+                    // 3. PRIMERO guarda los datos en DataStore
+                    viewModel.guardarDatos()
+
+                    // 4. LUEGO navega a la pantalla de resumen (igual que Guía 11)
                     navController.navigate(
                         AppScreens.ResumenScreen.createRoute(
                             nombre = uiState.nombre,
                             email = uiState.email,
                             carrera = uiState.carrera
                         )
-                    )
-                },
+                    )                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Ir a Resumen")

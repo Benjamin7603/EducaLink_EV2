@@ -2,7 +2,9 @@ package com.example.educalink_ev2.navigation
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,9 +12,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 
-// Importa todas tus pantallas
+
+import com.example.educalink_ev2.repository.UsuarioRepository
 import com.example.educalink_ev2.ui.screens.*
 import com.example.educalink_ev2.viewmodel.RegistroViewModel
+import com.example.educalink_ev2.viewmodel.RegistroViewModelFactory
 
 @Composable
 fun AppNavigation(
@@ -20,32 +24,43 @@ fun AppNavigation(
     windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
+
+    val context = LocalContext.current.applicationContext
+
     NavHost(
         navController = navController,
         startDestination = AppScreens.HomeScreen.route,
         modifier = modifier
     ) {
 
+        // ... (Rutas de Home, Profile, Resources quedan igual) ...
         composable(AppScreens.HomeScreen.route) {
             AdaptiveHomeScreen(windowSizeClass = windowSizeClass)
         }
-
-        // 1. Pasa el NavController a ProfileScreen
         composable(AppScreens.ProfileScreen.route) {
             ProfileScreen(navController = navController)
         }
-
         composable(AppScreens.ResourcesScreen.route) {
             ResourcesScreen()
         }
 
-        // 2. Pasa el NavController y el ViewModel a RegistroScreen
+        // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
         composable(AppScreens.RegistroScreen.route) {
-            val viewModel: RegistroViewModel = viewModel()
+
+            // 1. Crea una instancia del Repositorio (recordada)
+            val repository = remember { UsuarioRepository(context) }
+
+            // 2. Crea una instancia de la Fábrica (recordada)
+            val factory = remember { RegistroViewModelFactory(repository) }
+
+            // 3. Pasa la fábrica al ViewModel
+            val viewModel: RegistroViewModel = viewModel(factory = factory)
+
+            // 4. Pasa el ViewModel a la pantalla
             RegistroScreen(navController = navController, viewModel = viewModel)
         }
 
-        // 3. Define los argumentos para ResumenScreen
+        // ... (La ruta de ResumenScreen queda igual que en la Guía 11) ...
         composable(
             route = AppScreens.ResumenScreen.route,
             arguments = listOf(
@@ -54,7 +69,6 @@ fun AppNavigation(
                 navArgument("carrera") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            // 4. Extrae los argumentos y los pasa a la pantalla
             val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
             val email = backStackEntry.arguments?.getString("email") ?: ""
             val carrera = backStackEntry.arguments?.getString("carrera") ?: ""
