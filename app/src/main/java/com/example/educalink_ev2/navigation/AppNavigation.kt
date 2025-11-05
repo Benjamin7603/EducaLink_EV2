@@ -12,9 +12,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 
-
+// Importa todo lo necesario
 import com.example.educalink_ev2.repository.UsuarioRepository
 import com.example.educalink_ev2.ui.screens.*
+import com.example.educalink_ev2.viewmodel.PerfilViewModel
+import com.example.educalink_ev2.viewmodel.PerfilViewModelFactory
 import com.example.educalink_ev2.viewmodel.RegistroViewModel
 import com.example.educalink_ev2.viewmodel.RegistroViewModelFactory
 
@@ -24,8 +26,10 @@ fun AppNavigation(
     windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
-
     val context = LocalContext.current.applicationContext
+
+    // 1. Crea la instancia ÚNICA del Repositorio
+    val repository = remember { UsuarioRepository(context) }
 
     NavHost(
         navController = navController,
@@ -33,41 +37,41 @@ fun AppNavigation(
         modifier = modifier
     ) {
 
-        // ... (Rutas de Home, Profile, Resources quedan igual) ...
         composable(AppScreens.HomeScreen.route) {
-            AdaptiveHomeScreen(windowSizeClass = windowSizeClass)
+            // (Asegúrate de que este nombre coincida con tu archivo de la Guía 9)
+            AdaptiveHomeScreen(
+                windowSizeClass = windowSizeClass,
+                navController = navController
+            )
         }
+
+        // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
         composable(AppScreens.ProfileScreen.route) {
-            ProfileScreen(navController = navController)
+
+            // 2. Crea la Fábrica para PerfilViewModel
+            val factory = remember { PerfilViewModelFactory(repository) }
+
+            // 3. Inyecta el ViewModel
+            val viewModel: PerfilViewModel = viewModel(factory = factory)
+
+            ProfileScreen(navController = navController, viewModel = viewModel)
         }
+
         composable(AppScreens.ResourcesScreen.route) {
             ResourcesScreen()
         }
 
-        // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
+        // --- Ruta de Registro (Ya estaba bien de la Guía 12) ---
         composable(AppScreens.RegistroScreen.route) {
-
-            // 1. Crea una instancia del Repositorio (recordada)
-            val repository = remember { UsuarioRepository(context) }
-
-            // 2. Crea una instancia de la Fábrica (recordada)
             val factory = remember { RegistroViewModelFactory(repository) }
-
-            // 3. Pasa la fábrica al ViewModel
             val viewModel: RegistroViewModel = viewModel(factory = factory)
-
-            // 4. Pasa el ViewModel a la pantalla
             RegistroScreen(navController = navController, viewModel = viewModel)
         }
 
-        // ... (La ruta de ResumenScreen queda igual que en la Guía 11) ...
+        // --- Ruta de Resumen (Ya estaba bien de la Guía 11) ---
         composable(
             route = AppScreens.ResumenScreen.route,
-            arguments = listOf(
-                navArgument("nombre") { type = NavType.StringType },
-                navArgument("email") { type = NavType.StringType },
-                navArgument("carrera") { type = NavType.StringType }
-            )
+            // ... (argumentos) ...
         ) { backStackEntry ->
             val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
             val email = backStackEntry.arguments?.getString("email") ?: ""

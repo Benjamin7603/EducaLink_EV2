@@ -12,11 +12,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.educalink_ev2.navigation.AppScreens
 import com.example.educalink_ev2.viewmodel.RegistroViewModel
-import com.example.educalink_ev2.viewmodel.RegistroViewModelFactory // Ojo: Importa la Factory
+import com.example.educalink_ev2.viewmodel.RegistroViewModelFactory
 
-// Importa el factory (si no lo haces en AppNavigation)
-// import androidx.compose.ui.platform.LocalContext
-// import com.example.educalink_ev2.repository.UsuarioRepository
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
