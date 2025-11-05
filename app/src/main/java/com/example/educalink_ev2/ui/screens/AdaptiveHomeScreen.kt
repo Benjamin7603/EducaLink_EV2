@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -119,7 +120,7 @@ fun HomeScreenContent(
                         supportingContent = { Text("Las fechas se publicarán el 20 de Diciembre.") },
                         leadingContent = { Icon(Icons.Default.Star, contentDescription = null) }
                     )
-                    Divider()
+                    HorizontalDivider()
                     ListItem(
                         headlineContent = { Text("Suspensión de clases") },
                         supportingContent = { Text("No hay clases el Lunes por mantención.") },
