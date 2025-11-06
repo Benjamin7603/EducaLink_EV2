@@ -19,48 +19,56 @@ class UsuarioRepository(private val context: Context) {
     companion object {
         val NOMBRE_KEY = stringPreferencesKey("nombre_usuario")
         val CARRERA_KEY = stringPreferencesKey("carrera_usuario")
-        // --- NUEVAS LLAVES AÑADIDAS ---
         val EMAIL_REGISTRADO_KEY = stringPreferencesKey("email_registrado")
         val PASSWORD_REGISTRADO_KEY = stringPreferencesKey("password_registrado")
         val IS_LOGGED_IN_KEY = booleanPreferencesKey("is_logged_in")
+
+        // --- ¡NUEVA LLAVE PARA LA FOTO! ---
+        val FOTO_URI_KEY = stringPreferencesKey("foto_uri")
     }
 
+    // El flow AHORA TAMBIÉN EMITE la URI de la foto
     val userData: Flow<RegistroUiState> = context.dataStore.data
         .map { preferences ->
             RegistroUiState(
                 nombre = preferences[NOMBRE_KEY] ?: "",
-                email = preferences[EMAIL_REGISTRADO_KEY] ?: "", // Usa el email guardado
-                carrera = preferences[CARRERA_KEY] ?: ""
+                email = preferences[EMAIL_REGISTRADO_KEY] ?: "",
+                carrera = preferences[CARRERA_KEY] ?: "",
+                // --- ¡CARGAMOS LA URI GUARDADA! ---
+                fotoUri = preferences[FOTO_URI_KEY] ?: ""
             )
         }
 
-    // Flow para saber si el usuario está logueado
     val isLoggedIn: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[IS_LOGGED_IN_KEY] ?: false
         }
 
-    // Función para GUARDAR el NUEVO registro
     suspend fun guardarRegistro(nombre: String, email: String, carrera: String, contrasena: String) {
         context.dataStore.edit { settings ->
             settings[NOMBRE_KEY] = nombre
             settings[CARRERA_KEY] = carrera
             settings[EMAIL_REGISTRADO_KEY] = email
             settings[PASSWORD_REGISTRADO_KEY] = contrasena
-            settings[IS_LOGGED_IN_KEY] = false // Se registró, pero no ha iniciado sesión
+            settings[IS_LOGGED_IN_KEY] = false
         }
     }
 
-    // Función para VERIFICAR el Login
+    // --- ¡NUEVA FUNCIÓN PARA GUARDAR SÓLO LA FOTO! ---
+    suspend fun guardarFotoUri(fotoUri: String) {
+        context.dataStore.edit { settings ->
+            settings[FOTO_URI_KEY] = fotoUri
+        }
+    }
+
     suspend fun verificarLogin(emailIngresado: String, contrasenaIngresada: String): Boolean {
-        val preferences = context.dataStore.data.first() // Lee los datos una vez
+        val preferences = context.dataStore.data.first()
         val emailGuardado = preferences[EMAIL_REGISTRADO_KEY]
         val contrasenaGuardada = preferences[PASSWORD_REGISTRADO_KEY]
 
         val esValido = emailGuardado == emailIngresado && contrasenaGuardada == contrasenaIngresada
 
         if (esValido) {
-            // Si el login es correcto, marcamos la sesión como activa
             context.dataStore.edit { settings ->
                 settings[IS_LOGGED_IN_KEY] = true
             }
@@ -68,7 +76,6 @@ class UsuarioRepository(private val context: Context) {
         return esValido
     }
 
-    // Función para CERRAR SESIÓN
     suspend fun cerrarSesion() {
         context.dataStore.edit { settings ->
             settings[IS_LOGGED_IN_KEY] = false

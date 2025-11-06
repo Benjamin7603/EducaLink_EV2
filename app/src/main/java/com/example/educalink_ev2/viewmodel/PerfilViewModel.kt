@@ -27,13 +27,29 @@ class PerfilViewModel(
         viewModelScope.launch {
             repository.userData.collect { userData ->
                 _usuarioState.value = userData
+
+                // --- ¡LÓGICA DE CARGA AÑADIDA! ---
+                // Si el DataStore tiene una URI guardada (como String)...
+                if (userData.fotoUri.isNotBlank()) {
+                    // ...la convertimos de String a Uri y actualizamos el estado de la foto
+                    _fotoUri.value = Uri.parse(userData.fotoUri)
+                }
+                // --- FIN LÓGICA DE CARGA ---
             }
         }
     }
 
     // Esta función AHORA SÍ es llamada por la UI
     fun onFotoTomada(uri: Uri) {
+        // 1. Actualiza la UI instantáneamente
         _fotoUri.value = uri
+
+        // --- ¡LÓGICA DE GUARDADO AÑADIDA! ---
+        // 2. Guarda la URI (como String) en el DataStore para el futuro
+        viewModelScope.launch {
+            repository.guardarFotoUri(uri.toString())
+        }
+        // --- FIN LÓGICA DE GUARDADO ---
     }
 
     fun getUriTemporal(context: Context): Uri {
@@ -42,7 +58,6 @@ class PerfilViewModel(
 
         val authority = "${context.packageName}.provider"
         val uri = FileProvider.getUriForFile(context, authority, file)
-
 
         return uri
     }

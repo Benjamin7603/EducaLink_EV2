@@ -7,7 +7,9 @@ data class RegistroUiState(
     val contrasena: String = "",
     val repetirContrasena: String = "",
 
-    // Define los campos de error como Strings opcionales (String?)
+    // --- ¡CAMPO NUEVO AÑADIDO! ---
+    val fotoUri: String = "", // Guardará la URI como un String
+
     val errorNombre: String? = null,
     val errorEmail: String? = null,
     val errorContrasena: String? = null,
