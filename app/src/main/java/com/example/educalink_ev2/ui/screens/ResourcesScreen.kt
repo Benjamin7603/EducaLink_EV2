@@ -1,108 +1,81 @@
 package com.example.educalink_ev2.ui.screens
 
-// 1. IMPORTS NUEVOS QUE NECESITAMOS
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-// (El resto de tus imports están bien)
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LaptopChromebook
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector // Import para el ícono
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResourcesScreen() {
-    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+
+    // 1. Esta es la función mágica que abre el navegador
+    fun openUrlInBrowser(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        context.startActivity(intent)
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Recursos y Contacto") }
-            )
+            TopAppBar(title = { Text("Recursos Estudiantiles") })
         }
     ) { innerPadding ->
-
         LazyColumn(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp) // Añadimos padding aquí
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
+            // 2. Tarjeta para el Sitio Web Institucional
             item {
-                Text(
-                    "Enlaces Importantes",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                ResourceLinkCard(
+                    title = "Sitio Web Institucional",
+                    description = "Accede al portal principal de Duoc UC.",
+                    icon = Icons.Default.Language,
+                    onClick = {
+                        openUrlInBrowser("https://www.duoc.cl")
+                    }
                 )
             }
 
-            // --- ESTE ES EL NUEVO CÓDIGO (YA NO USA ListItem) ---
+            // 3. Tarjeta para el Aula Virtual (AVA)
             item {
-                ClickableRow(
-                    text = "Sitio Web Institucional",
-                    icon = Icons.Filled.Language,
-                    onClick = { uriHandler.openUri("https://www.tu-institucion.com") }
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-
-            item {
-                ClickableRow(
-                    text = "Aula Virtual (Moodle)",
-                    icon = Icons.Filled.LaptopChromebook,
-                    onClick = { uriHandler.openUri("https://moodle.tu-institucion.com") }
-                )
-            }
-            // --- FIN DEL CÓDIGO NUEVO ---
-
-            item {
-                Text(
-                    "Contacto",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
+                ResourceLinkCard(
+                    title = "Aula Virtual (AVA)",
+                    description = "Tu portal para ramos, notas y material de estudio.",
+                    icon = Icons.Default.School,
+                    onClick = {
+                        openUrlInBrowser("https://ava.duoc.cl")
+                    }
                 )
             }
 
-            // --- ESTOS TAMBIÉN LOS CAMBIAMOS (YA NO USAN ListItem) ---
+            // 4. (Opcional) Añadí la biblioteca, que también es un recurso clave
             item {
-                InfoRow(
-                    text = "Secretaría Académica",
-                    supportingText = "secretaria@tu-institucion.com",
-                    icon = Icons.Filled.Email
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-
-            item {
-                InfoRow(
-                    text = "Soporte TI",
-                    supportingText = "+56 9 1234 5678",
-                    icon = Icons.Filled.Phone
+                ResourceLinkCard(
+                    title = "Biblioteca",
+                    description = "Busca libros, publicaciones y recursos académicos.",
+                    icon = Icons.Default.MenuBook,
+                    onClick = {
+                        openUrlInBrowser("https://biblioteca.duoc.cl")
+                    }
                 )
             }
         }
@@ -110,56 +83,36 @@ fun ResourcesScreen() {
 }
 
 /**
- * Nuestro propio Composable Clickeable (reemplazo de ListItem con onClick)
+ * Un Composable reutilizable para mostrar cada enlace en una tarjeta.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ClickableRow(
-    text: String,
+private fun ResourceLinkCard(
+    title: String,
+    description: String,
     icon: ImageVector,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)) // Redondea las esquinas
-            .background(MaterialTheme.colorScheme.secondaryContainer) // Color de fondo
-            .clickable(onClick = onClick) // ¡AQUÍ ESTÁ EL ONCLICK!
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
-        Spacer(Modifier.width(16.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.weight(1f)
+        ListItem(
+            headlineContent = { Text(title, style = MaterialTheme.typography.titleMedium) },
+            supportingContent = { Text(description, style = MaterialTheme.typography.bodyMedium) },
+            leadingContent = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            trailingContent = {
+                TextButton(onClick = onClick) {
+                    Text("Abrir")
+                }
+            }
         )
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
-    }
-}
-
-/**
- * Nuestro propio Composable de Info (reemplazo de ListItem sin onClick)
- */
-@Composable
-private fun InfoRow(
-    text: String,
-    supportingText: String,
-    icon: ImageVector
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.width(16.dp))
-        Column {
-            Text(text, style = MaterialTheme.typography.bodyLarge)
-            Text(supportingText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
-        }
     }
 }
