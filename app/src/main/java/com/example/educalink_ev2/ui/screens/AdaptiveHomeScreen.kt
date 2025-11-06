@@ -1,14 +1,10 @@
 package com.example.educalink_ev2.ui.screens
 
 import androidx.compose.foundation.layout.*
-// 1. IMPORT QUE FALTABA
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -16,88 +12,158 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+// --- ¡IMPORTACIÓN FALTANTE AÑADIDA AQUÍ! ---
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.educalink_ev2.navigation.AppScreens
 import com.example.educalink_ev2.viewmodel.HomeViewModel
 
-
 @Composable
 fun AdaptiveHomeScreen(
     windowSizeClass: WindowSizeClass,
     navController: NavController,
+    authNavController: NavController,
     homeViewModel: HomeViewModel = viewModel()
 ) {
     val mensaje by homeViewModel.mensajeBienvenida.collectAsState()
+    val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
 
-    when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> {
+    when (isCompact) {
+        true -> {
             HomeScreenContent(
                 mensaje = mensaje,
                 navController = navController,
-                modifier = Modifier.padding(16.dp)
+                authNavController = authNavController,
+                modifier = Modifier.padding(16.dp),
+                isCompact = true
             )
         }
-        else -> {
+        false -> {
             HomeScreenContent(
                 mensaje = mensaje,
                 navController = navController,
-                modifier = Modifier.padding(32.dp)
+                authNavController = authNavController,
+                modifier = Modifier.padding(32.dp),
+                isCompact = false
             )
         }
     }
 }
 
-// --- CONTENIDO REAL DE LA PANTALLA ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
     mensaje: String,
     navController: NavController,
-    modifier: Modifier = Modifier
+    authNavController: NavController,
+    modifier: Modifier = Modifier,
+    isCompact: Boolean
 ) {
-    // 2. AHORA SÍ RECONOCERÁ LAZYCOLUMN
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        // 3. Y AHORA SÍ RECONOCERÁ ITEM
         item {
             Text(
                 text = mensaje,
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center
             )
         }
 
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         "Acciones Rápidas",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    Spacer(Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
+                    @Composable
+                    fun QuickActionButton(
+                        text: String,
+                        icon: ImageVector,
+                        onClick: () -> Unit,
+                        modifier: Modifier = Modifier
                     ) {
-                        Button(onClick = { navController.navigate(AppScreens.ProfileScreen.route) }) {
-                            Icon(Icons.Default.AccountCircle, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Mi Perfil")
+                        Button(
+                            onClick = onClick,
+                            modifier = modifier,
+                            shape = MaterialTheme.shapes.medium,
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                        ) {
+                            Icon(icon, contentDescription = text)
+                            Spacer(Modifier.width(12.dp))
+                            Text(text, style = MaterialTheme.typography.labelLarge)
                         }
-                        Button(onClick = { navController.navigate(AppScreens.ResourcesScreen.route) }) {
-                            Icon(Icons.Default.Search, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Recursos")
+                    }
+
+                    if (isCompact) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            QuickActionButton(
+                                text = "Mi Perfil",
+                                icon = Icons.Default.AccountCircle,
+                                onClick = { navController.navigate(AppScreens.ProfileScreen.route) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            QuickActionButton(
+                                text = "Recursos",
+                                icon = Icons.Default.Search,
+                                onClick = { navController.navigate(AppScreens.ResourcesScreen.route) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            QuickActionButton(
+                                text = "Encuentra tu Sede",
+                                icon = Icons.Default.Place,
+                                onClick = { navController.navigate(AppScreens.EncuentraSedeScreen.route) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            QuickActionButton(
+                                text = "Mi Perfil",
+                                icon = Icons.Default.AccountCircle,
+                                onClick = { navController.navigate(AppScreens.ProfileScreen.route) }
+                            )
+                            QuickActionButton(
+                                text = "Recursos",
+                                icon = Icons.Default.Search,
+                                onClick = { navController.navigate(AppScreens.ResourcesScreen.route) }
+                            )
+                            QuickActionButton(
+                                text = "Encuentra tu Sede",
+                                icon = Icons.Default.Place,
+                                onClick = { navController.navigate(AppScreens.EncuentraSedeScreen.route) }
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+
+                    OutlinedButton(
+                        onClick = { authNavController.navigate(AppScreens.RegistroScreen.route) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Registrar Nueva Cuenta")
                     }
                 }
             }
@@ -106,25 +172,36 @@ fun HomeScreenContent(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         "Anuncios Importantes",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    Spacer(Modifier.height(16.dp))
-
                     ListItem(
-                        headlineContent = { Text("Fechas de Exámenes Finales") },
+                        headlineContent = { Text("Fechas de Exámenes Finales", fontWeight = FontWeight.SemiBold) },
                         supportingContent = { Text("Las fechas se publicarán el 20 de Diciembre.") },
-                        leadingContent = { Icon(Icons.Default.Star, contentDescription = null) }
+                        leadingContent = {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = "Anuncio",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     ListItem(
-                        headlineContent = { Text("Suspensión de clases") },
+                        headlineContent = { Text("Suspensión de clases", fontWeight = FontWeight.SemiBold) },
                         supportingContent = { Text("No hay clases el Lunes por mantención.") },
-                        leadingContent = { Icon(Icons.Default.Star, contentDescription = null) }
+                        leadingContent = {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = "Anuncio",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     )
                 }
             }

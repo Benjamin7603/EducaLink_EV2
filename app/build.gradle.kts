@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    // 1. APLICA EL PLUGIN DE GOOGLE SERVICES
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 android {
@@ -18,6 +21,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // ... (Tu bloque 'buildTypes', 'compileOptions', 'kotlinOptions', 'buildFeatures'
+    //      queda exactamente igual) ...
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,17 +45,22 @@ android {
 }
 
 dependencies {
-    implementation("androidx.compose.material3:material3:1.2.1") // <-- ¡DEJA ESTA!
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material3)
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -61,5 +71,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
 }
