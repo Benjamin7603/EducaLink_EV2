@@ -1,4 +1,4 @@
-# 💙 EducaLink App 💙
+# 💙 == EducaLink App == 💙
 
 **EducaLink App** es una aplicación móvil educativa desarrollada en **Kotlin** utilizando **Jetpack Compose**, orientada a la **gestión académica y administrativa de estudiantes** dentro del contexto institucional de **Educanet**.  
 
