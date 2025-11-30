@@ -3,7 +3,7 @@ package com.example.educalink_ev2.ui.screens
 import android.Manifest
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast // --- ¡IMPORT FALTANTE AÑADIDO AQUÍ! ---
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.educalink_ev2.navigation.AppScreens
 import com.example.educalink_ev2.ui.components.ImagenInteligente
@@ -42,7 +41,6 @@ fun ProfileScreen(
                 viewModel.onFotoTomada(it)
             }
         } else {
-            // Esta línea ahora funcionará
             Toast.makeText(context, "Captura cancelada", Toast.LENGTH_SHORT).show()
         }
     }
@@ -55,7 +53,6 @@ fun ProfileScreen(
             uriTemporalParaCamara = uri
             launcherCamara.launch(uri)
         } else {
-            // Esta línea ahora funcionará
             Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_LONG).show()
         }
     }
@@ -83,12 +80,6 @@ fun ProfileScreen(
         Text("Nombre: ${usuarioState.nombre}", style = MaterialTheme.typography.bodyLarge)
         Text("Email: ${usuarioState.email}", style = MaterialTheme.typography.bodyLarge)
         Text("Carrera: ${usuarioState.carrera}", style = MaterialTheme.typography.bodyLarge)
-
-        Button(onClick = {
-            authNavController.navigate(AppScreens.RegistroScreen.route)
-        }) {
-            Text("Registrar Nueva Cuenta")
-        }
 
         Button(
             onClick = {

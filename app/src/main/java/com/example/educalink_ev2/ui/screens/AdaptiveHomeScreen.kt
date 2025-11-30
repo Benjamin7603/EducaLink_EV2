@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-// --- ¡IMPORTACIÓN FALTANTE AÑADIDA AQUÍ! ---
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -81,7 +80,9 @@ fun HomeScreenContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -158,13 +159,6 @@ fun HomeScreenContent(
                     }
 
                     Spacer(Modifier.height(24.dp))
-
-                    OutlinedButton(
-                        onClick = { authNavController.navigate(AppScreens.RegistroScreen.route) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Registrar Nueva Cuenta")
-                    }
                 }
             }
         }
@@ -181,8 +175,12 @@ fun HomeScreenContent(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     ListItem(
-                        headlineContent = { Text("Fechas de Exámenes Finales", fontWeight = FontWeight.SemiBold) },
-                        supportingContent = { Text("Las fechas se publicarán el 20 de Diciembre.") },
+                        headlineContent = {
+                            Text("Fechas de Exámenes Finales", fontWeight = FontWeight.SemiBold)
+                        },
+                        supportingContent = {
+                            Text("Las fechas se publicarán el 20 de Diciembre.")
+                        },
                         leadingContent = {
                             Icon(
                                 Icons.Default.Star,
@@ -193,8 +191,12 @@ fun HomeScreenContent(
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     ListItem(
-                        headlineContent = { Text("Suspensión de clases", fontWeight = FontWeight.SemiBold) },
-                        supportingContent = { Text("No hay clases el Lunes por mantención.") },
+                        headlineContent = {
+                            Text("Suspensión de clases", fontWeight = FontWeight.SemiBold)
+                        },
+                        supportingContent = {
+                            Text("No hay clases el Lunes por mantención.")
+                        },
                         leadingContent = {
                             Icon(
                                 Icons.Default.Star,
