@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "783357045728",
+    "project_id": "educalink-7fba4",
+    "storage_bucket": "educalink-7fba4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783357045728:android:42e6754fe1f15f14e85985",
+        "android_client_info": {
+          "package_name": "com.example.educalink_ev2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCavu3E3Q0rPUAF4_i52dRacOI1NB5HCQw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
