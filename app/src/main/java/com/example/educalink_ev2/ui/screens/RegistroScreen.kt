@@ -5,9 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,7 +45,6 @@ fun RegistroScreen(
                 onValueChange = { viewModel.onNombreChange(it) },
                 label = { Text("Nombre Completo") },
                 isError = uiState.errorNombre != null,
-                // Arreglo para "Smart cast"
                 supportingText = {
                     uiState.errorNombre?.let { error -> Text(error) }
                 },
@@ -66,13 +63,57 @@ fun RegistroScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = uiState.carrera,
-                onValueChange = { viewModel.onCarreraChange(it) },
-                label = { Text("Carrera") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+
+            // -----------------------------
+            //      CAMPO CARRERA NUEVO
+            // -----------------------------
+            var expanded by remember { mutableStateOf(false) }
+            val carreras = listOf(
+                "Ingeniería en Informática",
+                "Salud",
+                "Construcción",
+                "Ingeniería y Recursos Naturales",
+                "Comunicación",
+                "Turismo y Hospitalidad",
+                "Gastronomía"
             )
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = uiState.carrera,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Carrera") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    carreras.forEach { carrera ->
+                        DropdownMenuItem(
+                            text = { Text(carrera) },
+                            onClick = {
+                                viewModel.onCarreraChange(carrera)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            // -----------------------------
+            //     FIN CAMBIO CARRERA
+            // -----------------------------
+
             OutlinedTextField(
                 value = uiState.contrasena,
                 onValueChange = { viewModel.onContrasenaChange(it) },
@@ -107,7 +148,6 @@ fun RegistroScreen(
                 onClick = {
                     viewModel.guardarRegistro()
                     navController.navigate(AppScreens.LoginScreen.route) {
-                        // Arreglo para "inclusive"
                         popUpTo(AppScreens.AuthLoadingScreen.route) {
                             this.inclusive = true
                         }

@@ -13,6 +13,15 @@ import android.util.Patterns
 class RegistroViewModel(
     private val repository: UsuarioRepository
 ) : ViewModel() {
+    val carrerasDisponibles = listOf(
+        "Ingeniería en Informática",
+        "Salud",
+        "Construcción",
+        "Ingeniería y Recursos Naturales",
+        "Comunicación",
+        "Turismo y Hospitalidad",
+        "Gastronomía"
+    )
 
     private val _uiState = MutableStateFlow(RegistroUiState())
     val uiState = _uiState.asStateFlow()
