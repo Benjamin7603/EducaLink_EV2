@@ -26,13 +26,12 @@ import com.example.educalink_ev2.viewmodel.ResourcesViewModelFactory
 fun ResourcesScreen() {
     val context = LocalContext.current
 
-    // 1. Configuramos el ViewModel manualmente (inyección de dependencias simple)
+    // Configuración Manual de Inyección de Dependencias
     val apiService = RetrofitClient.instance
     val repository = remember { PostRepository(apiService) }
     val factory = remember { ResourcesViewModelFactory(repository) }
     val viewModel: ResourcesViewModel = viewModel(factory = factory)
 
-    // 2. Observamos los estados
     val noticias by viewModel.noticias.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -42,9 +41,7 @@ fun ResourcesScreen() {
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Recursos y Noticias") })
-        }
+        topBar = { TopAppBar(title = { Text("Recursos y Noticias") }) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -53,72 +50,31 @@ fun ResourcesScreen() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            // --- SECCIÓN 1: ENLACES (Lo que ya teníamos) ---
+            // SECCIÓN 1: Enlaces
             item {
-                Text(
-                    "Enlaces Estudiantiles",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Text("Enlaces Rápidos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            }
+            item {
+                ResourceLinkCard("Sitio Web Duoc", "Portal Institucional", Icons.Default.Language) { openUrlInBrowser("https://www.duoc.cl") }
+            }
+            item {
+                ResourceLinkCard("Aula Virtual (AVA)", "Tus asignaturas", Icons.Default.School) { openUrlInBrowser("https://ava.duoc.cl") }
             }
 
+            // SECCIÓN 2: API Rest
             item {
-                ResourceLinkCard(
-                    title = "Sitio Web Institucional",
-                    description = "Accede al portal principal de Duoc UC.",
-                    icon = Icons.Default.Language,
-                    onClick = { openUrlInBrowser("https://www.duoc.cl") }
-                )
-            }
-
-            item {
-                ResourceLinkCard(
-                    title = "Aula Virtual (AVA)",
-                    description = "Tu portal para ramos, notas y material de estudio.",
-                    icon = Icons.Default.School,
-                    onClick = { openUrlInBrowser("https://ava.duoc.cl") }
-                )
-            }
-
-            item {
-                ResourceLinkCard(
-                    title = "Biblioteca",
-                    description = "Busca libros, publicaciones y recursos académicos.",
-                    icon = Icons.Default.MenuBook,
-                    onClick = { openUrlInBrowser("https://biblioteca.duoc.cl") }
-                )
-            }
-
-            // --- SECCIÓN 2: NOTICIAS DESDE API (Lo Nuevo) ---
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "Noticias Recientes",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                    }
+                    Text("Noticias (API)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    if (isLoading) CircularProgressIndicator(modifier = Modifier.padding(start = 8.dp).size(20.dp))
                 }
-                Text(
-                    "Obtenido de jsonplaceholder.typicode.com",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
             }
 
             if (noticias.isEmpty() && !isLoading) {
-                item { Text("No se pudieron cargar las noticias.") }
+                item { Text("No hay noticias disponibles.") }
             } else {
-                // Iteramos sobre la lista de noticias que viene de la API
                 items(noticias) { post ->
-                    NoticiaCard(titulo = post.title, cuerpo = post.body)
+                    NoticiaCard(post.title, post.body)
                 }
             }
         }
@@ -127,53 +83,23 @@ fun ResourcesScreen() {
 
 @Composable
 fun NoticiaCard(titulo: String, cuerpo: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = titulo.replaceFirstChar { it.uppercase() }, // Capitalizar título
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = cuerpo.replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.bodyMedium
-            )
+    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(2.dp)) {
+        Column(Modifier.padding(16.dp)) {
+            Text(titulo.uppercase(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(4.dp))
+            Text(cuerpo, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ResourceLinkCard(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+fun ResourceLinkCard(title: String, desc: String, icon: ImageVector, onClick: () -> Unit) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         ListItem(
-            headlineContent = { Text(title, style = MaterialTheme.typography.titleMedium) },
-            supportingContent = { Text(description, style = MaterialTheme.typography.bodyMedium) },
-            leadingContent = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            trailingContent = {
-                TextButton(onClick = onClick) {
-                    Text("Abrir")
-                }
-            }
+            headlineContent = { Text(title) },
+            supportingContent = { Text(desc) },
+            leadingContent = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
         )
     }
 }

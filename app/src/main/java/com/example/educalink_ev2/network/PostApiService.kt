@@ -5,15 +5,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 
-// 1. La Interfaz: Define los métodos de la API
 interface PostApiService {
-    @GET("posts") // El endpoint (https://jsonplaceholder.typicode.com/posts)
+    @GET("eventos")
     suspend fun getPosts(): List<Post>
 }
 
-// 2. El Cliente: Configura Retrofit (Singleton)
 object RetrofitClient {
-    private const val BASE_URL = "https://jsonplaceholder.typicode.com/"
+    private const val BASE_URL = "http://10.0.2.2:8080/"
 
     val instance: PostApiService by lazy {
         Retrofit.Builder()
