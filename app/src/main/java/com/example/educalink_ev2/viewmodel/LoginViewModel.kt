@@ -22,20 +22,24 @@ class LoginViewModel(
     val loginState = _loginState.asStateFlow()
 
     fun iniciarLogin(email: String, contrasena: String) {
+        // Validación básica antes de llamar a la nube
+        if (email.isBlank() || contrasena.isBlank()) {
+            _loginState.value = LoginState.Error("Email y contraseña son obligatorios")
+            return
+        }
+
         _loginState.value = LoginState.Loading
 
         viewModelScope.launch {
-            if (email.isBlank() || contrasena.isBlank()) {
-                _loginState.value = LoginState.Error("Email y contraseña no pueden estar vacíos")
-                return@launch
-            }
+            // --- AQUÍ EL CAMBIO CLAVE ---
+            // Llamamos a loginUsuario (Firebase) en vez de verificarLogin (Local)
+            val loginExitoso = repository.loginUsuario(email, contrasena)
 
-            val esValido = repository.verificarLogin(email, contrasena)
-
-            if (esValido) {
+            if (loginExitoso) {
                 _loginState.value = LoginState.Success
             } else {
-                _loginState.value = LoginState.Error("Email o contraseña incorrectos")
+                // Firebase falló (Credenciales malas, usuario no existe o sin internet)
+                _loginState.value = LoginState.Error("Error: Credenciales incorrectas o sin conexión")
             }
         }
     }

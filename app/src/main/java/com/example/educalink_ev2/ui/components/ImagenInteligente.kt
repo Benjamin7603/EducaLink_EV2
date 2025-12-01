@@ -14,30 +14,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter // Si te marca error aquí, avísame (es la librería Coil)
 
 @Composable
-fun ImagenInteligente(
-    uri: Uri?, // La URI de la foto
-    modifier: Modifier = Modifier
-) {
-    if (uri != null) {
-        // Si SÍ hay URI, muestra la foto con Coil
-        AsyncImage(
-            model = uri,
+fun ImagenInteligente(uri: Uri?) {
+    val modifier = Modifier
+        .size(120.dp)
+        .clip(CircleShape)
+        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+
+    if (uri != null && uri.toString().isNotEmpty()) {
+        // Intenta mostrar la foto real
+        Image(
+            painter = rememberAsyncImagePainter(uri),
             contentDescription = "Foto de perfil",
-            modifier = modifier
-                .size(150.dp)
-                .clip(CircleShape)
-                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
+            modifier = modifier,
             contentScale = ContentScale.Crop
         )
     } else {
-        // Si NO hay URI, muestra un ícono
+        // Si no hay foto, muestra el ícono por defecto
         Icon(
             imageVector = Icons.Default.Person,
-            contentDescription = "Icono de perfil",
-            modifier = modifier.size(150.dp)
+            contentDescription = "Sin foto",
+            modifier = modifier,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

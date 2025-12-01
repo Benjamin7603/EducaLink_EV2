@@ -4,10 +4,13 @@ import com.example.educalink_ev2.model.Post
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-
+import com.example.educalink_ev2.model.Sede
 interface PostApiService {
     @GET("eventos")
     suspend fun getPosts(): List<Post>
+
+    @GET("sedes") // <--- NUEVO
+    suspend fun getSedes(): List<Sede>
 }
 
 object RetrofitClient {

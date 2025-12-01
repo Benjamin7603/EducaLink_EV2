@@ -1,5 +1,6 @@
 package com.example.educalink_ev2.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -8,203 +9,108 @@ import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.educalink_ev2.navigation.AppScreens
-import com.example.educalink_ev2.viewmodel.HomeViewModel
 
 @Composable
 fun AdaptiveHomeScreen(
     windowSizeClass: WindowSizeClass,
     navController: NavController,
-    authNavController: NavController,
-    homeViewModel: HomeViewModel = viewModel()
+    authNavController: NavController
 ) {
-    val mensaje by homeViewModel.mensajeBienvenida.collectAsState()
+    // Detectamos si es celular (Compact)
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
 
-    when (isCompact) {
-        true -> {
-            HomeScreenContent(
-                mensaje = mensaje,
-                navController = navController,
-                authNavController = authNavController,
-                modifier = Modifier.padding(16.dp),
-                isCompact = true
-            )
-        }
-        false -> {
-            HomeScreenContent(
-                mensaje = mensaje,
-                navController = navController,
-                authNavController = authNavController,
-                modifier = Modifier.padding(32.dp),
-                isCompact = false
-            )
-        }
-    }
-}
+    // --- AQUÍ ESTABA EL ERROR ---
+    // Borramos el Scaffold y el BottomBar de aquí, porque MainScreen ya lo tiene.
+    // Solo dejamos el contenido puro.
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeScreenContent(
-    mensaje: String,
-    navController: NavController,
-    authNavController: NavController,
-    modifier: Modifier = Modifier,
-    isCompact: Boolean
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    Row(modifier = Modifier.fillMaxSize()) {
 
-        item {
-            Text(
-                text = mensaje,
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        // Barra lateral (Solo para Tablets/Horizontal)
+        if (!isCompact) {
+            NavigationRail {
+                NavigationRailItem(
+                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                    label = { Text("Inicio") },
+                    selected = true,
+                    onClick = {}
                 )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Acciones Rápidas",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    @Composable
-                    fun QuickActionButton(
-                        text: String,
-                        icon: ImageVector,
-                        onClick: () -> Unit,
-                        modifier: Modifier = Modifier
-                    ) {
-                        Button(
-                            onClick = onClick,
-                            modifier = modifier,
-                            shape = MaterialTheme.shapes.medium,
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-                        ) {
-                            Icon(icon, contentDescription = text)
-                            Spacer(Modifier.width(12.dp))
-                            Text(text, style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-
-                    if (isCompact) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            QuickActionButton(
-                                text = "Mi Perfil",
-                                icon = Icons.Default.AccountCircle,
-                                onClick = { navController.navigate(AppScreens.ProfileScreen.route) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            QuickActionButton(
-                                text = "Recursos",
-                                icon = Icons.Default.Search,
-                                onClick = { navController.navigate(AppScreens.ResourcesScreen.route) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            QuickActionButton(
-                                text = "Encuentra tu Sede",
-                                icon = Icons.Default.Place,
-                                onClick = { navController.navigate(AppScreens.EncuentraSedeScreen.route) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            QuickActionButton(
-                                text = "Mi Perfil",
-                                icon = Icons.Default.AccountCircle,
-                                onClick = { navController.navigate(AppScreens.ProfileScreen.route) }
-                            )
-                            QuickActionButton(
-                                text = "Recursos",
-                                icon = Icons.Default.Search,
-                                onClick = { navController.navigate(AppScreens.ResourcesScreen.route) }
-                            )
-                            QuickActionButton(
-                                text = "Encuentra tu Sede",
-                                icon = Icons.Default.Place,
-                                onClick = { navController.navigate(AppScreens.EncuentraSedeScreen.route) }
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-                }
             }
         }
 
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Anuncios Importantes",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    ListItem(
-                        headlineContent = {
-                            Text("Fechas de Exámenes Finales", fontWeight = FontWeight.SemiBold)
+        // CONTENIDO PRINCIPAL (LISTA)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Text(
+                    text = "Bienvenido a EducaLink",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // TARJETA GPS
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clickable {
+                            navController.navigate(AppScreens.EncuentraSedeScreen.route)
                         },
-                        supportingContent = {
-                            Text("Las fechas se publicarán el 20 de Diciembre.")
-                        },
-                        leadingContent = {
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = "Anuncio",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("📍 Radar de Sede", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text("Ver distancia y ubicación", style = MaterialTheme.typography.bodyMedium)
                         }
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    ListItem(
-                        headlineContent = {
-                            Text("Suspensión de clases", fontWeight = FontWeight.SemiBold)
-                        },
-                        supportingContent = {
-                            Text("No hay clases el Lunes por mantención.")
-                        },
-                        leadingContent = {
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = "Anuncio",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Mapa",
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+            }
+
+            // TARJETA NOTICIAS
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Notifications, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Cartelera", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
-                    )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        ListItem(
+                            headlineContent = { Text("Suspensión de clases") },
+                            supportingContent = { Text("Viernes cerrado por mantención.") },
+                            leadingContent = { Icon(Icons.Default.Warning, contentDescription = null) }
+                        )
+                    }
                 }
             }
         }

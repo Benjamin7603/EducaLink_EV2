@@ -48,11 +48,9 @@ dependencies {
     implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0")
 
     // Firebase BOM (solo uno)
-    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
-
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.material3)
@@ -74,6 +72,9 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation(libs.androidx.compose.material3)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -86,9 +87,18 @@ dependencies {
     // Tests
     testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
     testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("io.mockk:mockk:1.13.10")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.5") // Para simular el repositorio
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3") // Para probar corrutinas
+
+    // --- DEPENDENCIAS PARA UI TESTING (Pantalla) ---
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Para mockear dentro de la UI
+    androidTestImplementation("io.mockk:mockk-android:1.13.5")
 
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.2")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.2")

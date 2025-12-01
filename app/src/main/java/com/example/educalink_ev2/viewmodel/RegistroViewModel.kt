@@ -1,5 +1,6 @@
 package com.example.educalink_ev2.viewmodel
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.educalink_ev2.model.RegistroUiState
@@ -8,11 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import android.util.Patterns
 
 class RegistroViewModel(
     private val repository: UsuarioRepository
 ) : ViewModel() {
+
     val carrerasDisponibles = listOf(
         "Ingeniería en Informática",
         "Salud",
@@ -26,7 +27,7 @@ class RegistroViewModel(
     private val _uiState = MutableStateFlow(RegistroUiState())
     val uiState = _uiState.asStateFlow()
 
-    // --- Funciones de Validación ---
+    // --- Funciones de Validación (Igual que antes) ---
     fun onNombreChange(nombre: String) {
         val error = if (nombre.isBlank()) "El nombre no puede estar vacío" else null
         _uiState.update { it.copy(nombre = nombre, errorNombre = error) }
@@ -40,12 +41,13 @@ class RegistroViewModel(
     }
 
     fun onCarreraChange(carrera: String) {
-        _uiState.update { it.copy(carrera = carrera) }
+        val error = if (carrera.isBlank()) "Debe seleccionar una carrera" else null
+        _uiState.update { it.copy(carrera = carrera, errorCarrera = error) }
         validarFormulario()
     }
 
     fun onContrasenaChange(contrasena: String) {
-        val error = if (contrasena.length < 6) "Debe tener al menos 6 caracteres" else null
+        val error = if (contrasena.length < 6) "Mínimo 6 caracteres" else null
         _uiState.update { it.copy(contrasena = contrasena, errorContrasena = error) }
         validarContrasenasCoinciden()
         validarFormulario()
@@ -79,17 +81,28 @@ class RegistroViewModel(
         }
     }
 
-    // --- Función de Guardado ---
-    fun guardarRegistro() {
+    // --- FUNCIÓN DE GUARDADO CON FIREBASE ---
+    fun guardarRegistro(onSuccess: () -> Unit) {
         if (!_uiState.value.esValido) return
 
         viewModelScope.launch {
-            repository.guardarRegistro(
+            // Llamamos al repositorio que ahora conecta con Firebase
+            val exito = repository.registrarUsuario(
                 nombre = _uiState.value.nombre,
                 email = _uiState.value.email,
                 carrera = _uiState.value.carrera,
                 contrasena = _uiState.value.contrasena
             )
+
+            if (exito) {
+                // Si Firebase responde TRUE, ejecutamos la navegación
+                onSuccess()
+            } else {
+                // Si falla (ej: correo ya existe), mostramos error en el campo Email
+                _uiState.update {
+                    it.copy(errorEmail = "Error: El correo ya existe o no hay internet")
+                }
+            }
         }
     }
 }

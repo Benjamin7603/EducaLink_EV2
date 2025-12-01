@@ -3,82 +3,87 @@ package com.example.educalink_ev2.repository
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.educalink_ev2.model.RegistroUiState
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_settings")
 
 class UsuarioRepository(private val context: Context) {
 
-    companion object {
-        val NOMBRE_KEY = stringPreferencesKey("nombre_usuario")
-        val CARRERA_KEY = stringPreferencesKey("carrera_usuario")
-        val EMAIL_REGISTRADO_KEY = stringPreferencesKey("email_registrado")
-        val PASSWORD_REGISTRADO_KEY = stringPreferencesKey("password_registrado")
-        val IS_LOGGED_IN_KEY = booleanPreferencesKey("is_logged_in")
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-        // --- ¡NUEVA LLAVE PARA LA FOTO! ---
+    companion object {
+        val CARRERA_KEY = stringPreferencesKey("carrera_usuario")
         val FOTO_URI_KEY = stringPreferencesKey("foto_uri")
     }
 
-    // El flow AHORA TAMBIÉN EMITE la URI de la foto
-    val userData: Flow<RegistroUiState> = context.dataStore.data
-        .map { preferences ->
-            RegistroUiState(
-                nombre = preferences[NOMBRE_KEY] ?: "",
-                email = preferences[EMAIL_REGISTRADO_KEY] ?: "",
-                carrera = preferences[CARRERA_KEY] ?: "",
-                // --- ¡CARGAMOS LA URI GUARDADA! ---
-                fotoUri = preferences[FOTO_URI_KEY] ?: ""
-            )
-        }
+    // --- FUNCIÓN QUE USA 'AuthLoadingScreen' ---
+    fun isUserLoggedIn(): Boolean {
+        return auth.currentUser != null
+    }
 
-    val isLoggedIn: Flow<Boolean> = context.dataStore.data
-        .map { preferences ->
-            preferences[IS_LOGGED_IN_KEY] ?: false
-        }
+    // 1. REGISTRO
+    suspend fun registrarUsuario(nombre: String, email: String, carrera: String, contrasena: String): Boolean {
+        return try {
+            val resultado = auth.createUserWithEmailAndPassword(email, contrasena).await()
+            val usuarioFirebase = resultado.user
+            val profileUpdates = userProfileChangeRequest { displayName = nombre }
+            usuarioFirebase?.updateProfile(profileUpdates)?.await()
 
-    suspend fun guardarRegistro(nombre: String, email: String, carrera: String, contrasena: String) {
-        context.dataStore.edit { settings ->
-            settings[NOMBRE_KEY] = nombre
-            settings[CARRERA_KEY] = carrera
-            settings[EMAIL_REGISTRADO_KEY] = email
-            settings[PASSWORD_REGISTRADO_KEY] = contrasena
-            settings[IS_LOGGED_IN_KEY] = false
+            // Aquí usamos dataStore (funciona gracias a la línea de arriba)
+            context.dataStore.edit { prefs -> prefs[CARRERA_KEY] = carrera }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
-    // --- ¡NUEVA FUNCIÓN PARA GUARDAR SÓLO LA FOTO! ---
-    suspend fun guardarFotoUri(fotoUri: String) {
-        context.dataStore.edit { settings ->
-            settings[FOTO_URI_KEY] = fotoUri
+    // 2. LOGIN
+    suspend fun loginUsuario(email: String, contrasena: String): Boolean {
+        return try {
+            auth.signInWithEmailAndPassword(email, contrasena).await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
-    suspend fun verificarLogin(emailIngresado: String, contrasenaIngresada: String): Boolean {
-        val preferences = context.dataStore.data.first()
-        val emailGuardado = preferences[EMAIL_REGISTRADO_KEY]
-        val contrasenaGuardada = preferences[PASSWORD_REGISTRADO_KEY]
+    // 3. CERRAR SESIÓN
+    suspend fun cerrarSesion() {
+        auth.signOut()
+        context.dataStore.edit { it.clear() }
+    }
 
-        val esValido = emailGuardado == emailIngresado && contrasenaGuardada == contrasenaIngresada
-
-        if (esValido) {
-            context.dataStore.edit { settings ->
-                settings[IS_LOGGED_IN_KEY] = true
+    // 4. DATOS DEL USUARIO (Aquí te daba el error rojo)
+    val userData: Flow<RegistroUiState> = flow {
+        // Al recolectar del dataStore, necesitamos que la línea del principio del archivo exista
+        context.dataStore.data.collect { prefs ->
+            val user = auth.currentUser
+            if (user != null) {
+                emit(RegistroUiState(
+                    nombre = user.displayName ?: "Usuario",
+                    email = user.email ?: "",
+                    carrera = prefs[CARRERA_KEY] ?: "Carrera no especificada",
+                    fotoUri = prefs[FOTO_URI_KEY] ?: "",
+                    esValido = true
+                ))
+            } else {
+                emit(RegistroUiState())
             }
         }
-        return esValido
     }
 
-    suspend fun cerrarSesion() {
-        context.dataStore.edit { settings ->
-            settings[IS_LOGGED_IN_KEY] = false
-        }
+    // 5. GUARDAR FOTO
+    suspend fun guardarFotoUri(fotoUri: String) {
+        context.dataStore.edit { settings -> settings[FOTO_URI_KEY] = fotoUri }
     }
 }

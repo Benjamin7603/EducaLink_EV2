@@ -25,85 +25,107 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginViewModel
 ) {
+    // Estados locales para el formulario
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // Observamos el estado del login (Loading, Success, Error)
     val loginState by viewModel.loginState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Iniciar Sesión", style = MaterialTheme.typography.headlineLarge)
-        Text("Bienvenido a EducaLink", style = MaterialTheme.typography.bodyMedium)
-        Spacer(Modifier.height(32.dp))
-
-        OutlinedTextField(
-            value = email,
-            // --- ¡AQUÍ ESTABA MI ERROR! (Decía onValueCode) ---
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    // (Corregí el typo "Ocular" a "Ocultar")
-                    Icon(imageVector = image, contentDescription = "Mostrar/Ocultar contraseña")
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(24.dp))
-
-        if (loginState is LoginViewModel.LoginState.Error) {
-            Text(
-                text = (loginState as LoginViewModel.LoginState.Error).mensaje,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-
-        if (loginState is LoginViewModel.LoginState.Loading) {
-            CircularProgressIndicator()
-        } else {
-            Button(
-                onClick = { viewModel.iniciarLogin(email, password) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ingresar")
+    // --- EFECTO DE NAVEGACIÓN ---
+    // Si el estado cambia a Success, navegamos automáticamente
+    LaunchedEffect(loginState) {
+        if (loginState is LoginViewModel.LoginState.Success) {
+            navController.navigate(AppScreens.MainScreen.route) {
+                // ESTO ES CLAVE: Borramos el historial para que no pueda volver atrás al login
+                popUpTo(AppScreens.AuthLoadingScreen.route) { inclusive = true }
             }
         }
+    }
 
-        Spacer(Modifier.height(16.dp))
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Iniciar Sesión") }) }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()), // Scroll por si la pantalla es chica
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
-        TextButton(onClick = {
-            navController.navigate(AppScreens.RegistroScreen.route)
-        }) {
-            Text("No tengo cuenta, registrarme")
-        }
+            Text(
+                text = "Bienvenido a EducaLink",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
 
-        LaunchedEffect(loginState) {
-            if (loginState is LoginViewModel.LoginState.Success) {
-                navController.navigate(AppScreens.MainScreen.route) {
-                    popUpTo(AppScreens.AuthLoadingScreen.route) { inclusive = true }
+            Spacer(Modifier.height(32.dp))
+
+            // Campo Email
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Correo Electrónico") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // Campo Contraseña
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Contraseña") },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "Mostrar contraseña")
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // Mostrar Error si existe
+            if (loginState is LoginViewModel.LoginState.Error) {
+                Text(
+                    text = (loginState as LoginViewModel.LoginState.Error).mensaje,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            // Botón de Ingreso (o Círculo de Carga)
+            if (loginState is LoginViewModel.LoginState.Loading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = { viewModel.iniciarLogin(email, password) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = email.isNotBlank() && password.isNotBlank()
+                ) {
+                    Text("Ingresar")
                 }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Botón para ir al Registro
+            TextButton(onClick = {
+                navController.navigate(AppScreens.RegistroScreen.route)
+            }) {
+                Text("¿No tienes cuenta? Regístrate aquí")
             }
         }
     }

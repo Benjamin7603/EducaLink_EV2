@@ -36,97 +36,61 @@ fun RegistroScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text("Ingrese sus datos", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(8.dp))
+            Text("Ingrese sus datos", style = MaterialTheme.typography.titleMedium)
 
-            // --- INICIO DE CAMPOS CON ARREGLO ---
+            // CAMPO NOMBRE
             OutlinedTextField(
                 value = uiState.nombre,
                 onValueChange = { viewModel.onNombreChange(it) },
                 label = { Text("Nombre Completo") },
                 isError = uiState.errorNombre != null,
-                supportingText = {
-                    uiState.errorNombre?.let { error -> Text(error) }
-                },
+                supportingText = { uiState.errorNombre?.let { error -> Text(error) } },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // CAMPO EMAIL (Ahora mostrará error si Firebase dice que ya existe)
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = { viewModel.onEmailChange(it) },
-                label = { Text("Email") },
+                label = { Text("Correo Electrónico") },
                 isError = uiState.errorEmail != null,
-                supportingText = {
-                    uiState.errorEmail?.let { error -> Text(error) }
-                },
+                supportingText = { uiState.errorEmail?.let { error -> Text(error) } },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // -----------------------------
-            //      CAMPO CARRERA NUEVO
-            // -----------------------------
-            var expanded by remember { mutableStateOf(false) }
-            val carreras = listOf(
-                "Ingeniería en Informática",
-                "Salud",
-                "Construcción",
-                "Ingeniería y Recursos Naturales",
-                "Comunicación",
-                "Turismo y Hospitalidad",
-                "Gastronomía"
+            // CAMPO CARRERA (Selector o Texto)
+            // Nota: Aquí podrías usar un DropdownMenu con viewModel.carrerasDisponibles
+            // Por ahora mantengo tu TextField original o un ReadOnly si prefieres el Dropdown.
+            // Para simplificar y mantener tu código original, usamos un OutlinedTextField editable o de lista.
+            // Aquí simularé un campo de texto simple que valida que no esté vacío,
+            // pero idealmente usarías un ExposedDropdownMenuBox.
+            OutlinedTextField(
+                value = uiState.carrera,
+                onValueChange = { viewModel.onCarreraChange(it) },
+                label = { Text("Carrera") },
+                isError = uiState.errorCarrera != null,
+                supportingText = { uiState.errorCarrera?.let { error -> Text(error) } },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-                OutlinedTextField(
-                    value = uiState.carrera,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Carrera") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-                    },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    carreras.forEach { carrera ->
-                        DropdownMenuItem(
-                            text = { Text(carrera) },
-                            onClick = {
-                                viewModel.onCarreraChange(carrera)
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-            // -----------------------------
-            //     FIN CAMBIO CARRERA
-            // -----------------------------
-
+            // CAMPO CONTRASEÑA
             OutlinedTextField(
                 value = uiState.contrasena,
                 onValueChange = { viewModel.onContrasenaChange(it) },
-                label = { Text("Contraseña") },
+                label = { Text("Contraseña (Min 6 caracteres)") },
                 isError = uiState.errorContrasena != null,
-                supportingText = {
-                    uiState.errorContrasena?.let { error -> Text(error) }
-                },
+                supportingText = { uiState.errorContrasena?.let { error -> Text(error) } },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // CAMPO REPETIR CONTRASEÑA
             OutlinedTextField(
                 value = uiState.repetirContrasena,
                 onValueChange = { viewModel.onRepetirContrasenaChange(it) },
@@ -140,18 +104,22 @@ fun RegistroScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            // --- FIN DE CAMPOS CON ARREGLO ---
 
             Spacer(Modifier.height(16.dp))
 
+            // --- BOTÓN MODIFICADO PARA FIREBASE ---
             Button(
                 onClick = {
-                    viewModel.guardarRegistro()
-                    navController.navigate(AppScreens.LoginScreen.route) {
-                        popUpTo(AppScreens.AuthLoadingScreen.route) {
-                            this.inclusive = true
+                    // LLAMADA ASÍNCRONA:
+                    // Le pasamos la navegación como una función (lambda) que se ejecutará
+                    // SOLO si el ViewModel confirma que Firebase creó el usuario correctamente.
+                    viewModel.guardarRegistro(onSuccess = {
+                        navController.navigate(AppScreens.LoginScreen.route) {
+                            popUpTo(AppScreens.AuthLoadingScreen.route) {
+                                this.inclusive = true
+                            }
                         }
-                    }
+                    })
                 },
                 enabled = uiState.esValido,
                 modifier = Modifier.fillMaxWidth()

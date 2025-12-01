@@ -14,11 +14,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+
+// --- IMPORTS EXPLÍCITOS (PARA QUE NO FALLE NUNCA) ---
 import com.example.educalink_ev2.repository.UsuarioRepository
-import com.example.educalink_ev2.ui.screens.*
 import com.example.educalink_ev2.viewmodel.PerfilViewModel
 import com.example.educalink_ev2.viewmodel.PerfilViewModelFactory
-
+import com.example.educalink_ev2.ui.screens.AdaptiveHomeScreen
+import com.example.educalink_ev2.ui.screens.ProfileScreen
+import com.example.educalink_ev2.ui.screens.ResourcesScreen
+import com.example.educalink_ev2.ui.screens.EncuentraSedeScreen
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -31,18 +35,16 @@ fun AppNavigation(
     val context = LocalContext.current.applicationContext
     val repository = remember { UsuarioRepository(context) }
 
-
     AnimatedNavHost(
         navController = navController,
-        startDestination = AppScreens.HomeScreen.route,
+        startDestination = AppScreens.MainScreen.route,
         modifier = modifier,
-
-
         enterTransition = { fadeIn(animationSpec = tween(300)) },
         exitTransition = { fadeOut(animationSpec = tween(300)) }
     ) {
 
-        composable(AppScreens.HomeScreen.route) {
+        // HOME
+        composable(AppScreens.MainScreen.route) {
             AdaptiveHomeScreen(
                 windowSizeClass = windowSizeClass,
                 navController = navController,
@@ -50,6 +52,7 @@ fun AppNavigation(
             )
         }
 
+        // PERFIL
         composable(AppScreens.ProfileScreen.route) {
             val factory = remember { PerfilViewModelFactory(repository) }
             val viewModel: PerfilViewModel = viewModel(factory = factory)
@@ -60,10 +63,12 @@ fun AppNavigation(
             )
         }
 
+        // RECURSOS
         composable(AppScreens.ResourcesScreen.route) {
             ResourcesScreen()
         }
 
+        // GPS
         composable(AppScreens.EncuentraSedeScreen.route) {
             EncuentraSedeScreen()
         }
